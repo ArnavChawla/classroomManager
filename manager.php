@@ -18,6 +18,7 @@
 		time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 		name text NOT NULL,
 		class text NOT NULL,
+		classId text NOT NULL,
 		email text NOT NULL,
 		phone text NOT NULL,
 		day text NOT NULL,
@@ -88,12 +89,14 @@ function data_func( $atts ){
 		$student_email = 'arnav@justadev.club';
 		$student_phone = '4255245667';
 		$table_name = $wpdb->prefix . 'student';
+		$string = $_POST['form_class'];
+		$str_arr = explode (",", $string);
 	$wpdb->insert(
 		$table_name,
 		array(
-			'time' => current_time( 'mysql' ),
 			'name' => $_POST['form_name'],
-			'class' => $_POST['form_class'],
+			'class' => $str_arr[0],
+			'classId' => $str_arr[1],
 			'email' => $_POST['form_email'],
 			'phone' => $_POST['form_phone'],
 			'day' => $_POST['form_day'],
@@ -119,7 +122,7 @@ function html_form_code() {
 	$results = $wpdb->get_results( "SELECT * FROM wp_classes");
 	echo '<select name="form_class">';
   foreach($results as $row){
-	echo "<option value=\"". $row->class . "\">" .$row->class. "</option>";
+	echo "<option value=\"". $row->class . ",". $row->id ."\">" .$row->class. "</option>";
 	}
 	echo '</select>';
 	echo '</p>';
@@ -138,78 +141,188 @@ function html_form_code() {
 
 function my_awesome_page_display() {
     global $wpdb;
-    $results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
 
-    if(!empty($results))                        // Checking if $results have some values or not
-    {
-        echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
-        echo "<tbody>";
-        foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
-        echo "<tr>";                           // Adding rows of table inside foreach loop
-        echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Class</th>" . "<td>" . $row->class . "</td>";
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
-        echo "</tr>";
+		if(!array_key_exists('form_class', $_POST))
+		{
+			$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
+			$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
+	    if(!empty($results))                        // Checking if $results have some values or not
+	    {
+	        echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
+	        echo "<tbody>";
+	        foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
+		        echo "<tr>";                           // Adding rows of table inside foreach loop
+		        echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
+		        echo "</tr>";
+		        echo "<td colspan='2'><hr size='1'></td>";
+		        echo "<tr>";
+		        echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
+		        echo "</tr>";
+		        echo "<td colspan='2'><hr size='1'></td>";
+		        echo "<tr>";
+		        echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
+		        echo "</tr>";
+		        echo "<td colspan='2'><hr size='1'></td>";
+		        echo "<tr>";
+		        echo "<th>Class</th>" . "<td>";
+						echo '<form action="" method="post">';
+						echo '<input type="hidden" name="id" value="'. $row->id .'">';
+						echo '<select name="form_class" onchange="this.form.submit()" >';
+						echo "<option value=\"". $row->classId . "\">" .$row->class. "</option>";
+						foreach($classResults as $newRow)
+						{
+							if($newRow->id != $row->classId){
+							echo "<option value=\"". $newRow->id . ",". $newRow->class ."\">" .$newRow->class. "</option>";
+							}
+						}
+						echo '</select>';
+						echo "</form>";
+						echo "</td>";
+		        echo "</tr>";
+		        echo "<td colspan='2'><hr size='1'></td>";
+		        echo "<tr>";
+		        echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
+		        echo "</tr>";
+		        echo "<td colspan='2'><hr size='1'></td>";
+		        echo "<tr>";
+		        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
+		        echo "</tr>";
 
-        }
-        echo "</tbody>";
-        echo "</table>";
+	        }
+	        echo "</tbody>";
+	        echo "</table>";
 
-    }
-    else
-    {
-        echo 'empty';
-    }
+	    }
+	    else
+	    {
+	        echo 'empty';
+	    }
+	}
+	else {
+		$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
+		$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
+		$string = $_POST['form_class'];
+		$str_arr = explode (",", $string);
+		$table = 'wp_student';
+		$data = array('classId'=>$str_arr[0]);
+		$where = array('id'=>$_POST['id']);
+		$wpdb->update( $table, $data, $where);
+		$table = 'wp_student';
+		$data = array('class'=>$str_arr[1]);
+		$where = array('id'=>$_POST['id']);
+		$wpdb->update( $table, $data, $where);
+		if(!empty($results))                        // Checking if $results have some values or not
+		{
+				echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
+				echo "<tbody>";
+				foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
+					echo "<tr>";                           // Adding rows of table inside foreach loop
+					echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
+					echo "</tr>";
+					echo "<td colspan='2'><hr size='1'></td>";
+					echo "<tr>";
+					echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
+					echo "</tr>";
+					echo "<td colspan='2'><hr size='1'></td>";
+					echo "<tr>";
+					echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
+					echo "</tr>";
+					echo "<td colspan='2'><hr size='1'></td>";
+					echo "<tr>";
+					echo "<th>Class</th>" . "<td>";
+					echo '<form action="" method="post">';
+					echo '<input type="hidden" name="id" value="'. $row->id .'">';
+					echo '<select name="form_class" onchange="this.form.submit()" >';
+					echo "<option value=\"". $row->classId . "\">" .$row->class. "</option>";
+					foreach($classResults as $newRow)
+					{
+						if($newRow->id != $row->classId){
+						echo "<option value=\"". $newRow->id . ",". $newRow->class ."\">" .$newRow->class. "</option>";
+						}
+					}
+					echo '</select>';
+					echo "</form>";
+					echo "</td>";
+					echo "</tr>";
+					echo "<td colspan='2'><hr size='1'></td>";
+					echo "<tr>";
+					echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
+					echo "</tr>";
+					echo "<td colspan='2'><hr size='1'></td>";
+					echo "<tr>";
+					echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
+					echo "</tr>";
 
+				}
+				echo "</tbody>";
+				echo "</table>";
+
+		}
+		else
+		{
+				echo 'empty';
+		}
+	}
 }
 function display_classes() {
-    global $wpdb;
-    $results = $wpdb->get_results( "SELECT * FROM wp_classes"); // Query to fetch data from database table and storing in $results
+	global $wpdb;
+	echo '<form action="" method="post">';
+	echo '<p>';
+	echo 'Select A Class (required) <br/>';
+	$results = $wpdb->get_results( "SELECT * FROM wp_classes");
+	echo '<select name="form_class">';
+  foreach($results as $row){
+	echo "<option value=\"". $row->id . "\">" .$row->class. "</option>";
+	}
+	echo '</select>';
+	echo '</p>';
+	echo '<p><input type="submit" name="cf-submitted" value="Go!"></p>';
+	echo '</form>';
+	if($_POST["form_class"] == "")
+	{
+		echo " ";
+	}
+	else {
+		$new = $wpdb->get_results( "SELECT * FROM wp_student WHERE classId LIKE " . "'". $_POST['form_class'] ."'");
+		if(!empty($new))                        // Checking if $results have some values or not
+		{
+				echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
+				echo "<tbody>";
+				foreach($new as $row){            //putting the user_ip field value in variable to use it later in update query
+				echo "<tr>";                           // Adding rows of table inside foreach loop
+				echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
+				echo "</tr>";
+				echo "<td colspan='2'><hr size='1'></td>";
+				echo "<tr>";
+				echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
+				echo "</tr>";
+				echo "<td colspan='2'><hr size='1'></td>";
+				echo "<tr>";
+				echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
+				echo "</tr>";
+				echo "<td colspan='2'><hr size='1'></td>";
+				echo "<tr>";
+				echo "<th>Class</th>" . "<td>" . $row->class . "</td>";
+				echo "</tr>";
+				echo "<td colspan='2'><hr size='1'></td>";
+				echo "<tr>";
+				echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
+				echo "</tr>";
+				echo "<td colspan='2'><hr size='1'></td>";
+				echo "<tr>";
+				echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
+				echo "</tr>";
 
-    if(!empty($results))                        // Checking if $results have some values or not
-    {
-        echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
-        echo "<tbody>";
-        foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
-        echo "<tr>";                           // Adding rows of table inside foreach loop
-        echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Name</th>" . "<td>" . $row->class . "</td>";   //fetching data from user_ip field
-        echo "</tr>";
-        echo "<td colspan='2'><hr size='1'></td>";
-        echo "<tr>";
-        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
-        echo "</tr>";
+				}
+				echo "</tbody>";
+				echo "</table>";
 
-        }
-        echo "</tbody>";
-        echo "</table>";
-
-    }
-    else
-    {
-        echo 'empty';
-    }
+		}
+		else
+		{
+				echo 'empty';
+		}
+	}
 
 }
 function my_cool_plugin_settings_page() {
