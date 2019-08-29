@@ -6,7 +6,8 @@
  * Version: 1.0
  * Author: Arnav Chawla
  * Author URI: http://www.mywebsite.com
- */ global $jal_db_version; $jal_db_version = '1.0'; function do_first() {
+ */ global $jal_db_version; $jal_db_version = '1.0';
+ function do_first() {
 	global $wpdb;
 	global $jal_db_version;
 	$table_name = $wpdb->prefix . 'student';
@@ -25,6 +26,32 @@
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 	dbDelta( $sql );
 	add_option( 'jal_db_version', $jal_db_version );
+}
+function do_second() {
+ global $wpdb;
+ global $jal_db_version;
+ $table_name = $wpdb->prefix . 'classes';
+
+ $charset_collate = $wpdb->get_charset_collate();
+ $sql = "CREATE TABLE $table_name (
+	 class text NOT NULL,
+	 id text NOT NULL,
+	 day text NOT NULL,
+	 PRIMARY KEY (id)
+ ) $charset_collate;";
+
+ require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+ dbDelta( $sql );
+ add_option( 'jal_db_version', $jal_db_version );
+}
+global $options;
+foreach ($options as $value) {
+    if (get_option($value['id']) === FALSE) {
+        $$value['id'] = $value['std'];
+    }
+    else {
+        $$value['id'] = get_option( $value['id'] );
+    }
 }
 // function do_thing() {
 // 	global $wpdb;
@@ -77,6 +104,7 @@ function data_func( $atts ){
 
 }
 function html_form_code() {
+	global $wpdb;
 	echo '<form action="" method="post">';
 	echo '<p>';
 	echo 'Your Name (required) <br/>';
@@ -88,11 +116,11 @@ function html_form_code() {
 	echo '</p>';
 	echo '<p>';
 	echo 'Class (required) <br/>';
+	$results = $wpdb->get_results( "SELECT * FROM wp_classes");
 	echo '<select name="form_class">';
-	echo '<option value="FTC1">FTC1</option>';
-	echo '<option value="FTC2">FTC2</option>';
-	echo '<option value="FTC3">FTC3</option>';
-	echo '<option value="FTC4">FTC4</option>';
+  foreach($results as $row){
+	echo "<option value=\"". $row->class . "\">" .$row->class. "</option>";
+	}
 	echo '</select>';
 	echo '</p>';
 	echo '<p>';
@@ -152,6 +180,91 @@ function my_awesome_page_display() {
     }
 
 }
+function display_classes() {
+    global $wpdb;
+    $results = $wpdb->get_results( "SELECT * FROM wp_classes"); // Query to fetch data from database table and storing in $results
+
+    if(!empty($results))                        // Checking if $results have some values or not
+    {
+        echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
+        echo "<tbody>";
+        foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
+        echo "<tr>";                           // Adding rows of table inside foreach loop
+        echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
+        echo "</tr>";
+        echo "<td colspan='2'><hr size='1'></td>";
+        echo "<tr>";
+        echo "<th>Name</th>" . "<td>" . $row->class . "</td>";   //fetching data from user_ip field
+        echo "</tr>";
+        echo "<td colspan='2'><hr size='1'></td>";
+        echo "<tr>";
+        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
+        echo "</tr>";
+
+        }
+        echo "</tbody>";
+        echo "</table>";
+
+    }
+    else
+    {
+        echo 'empty';
+    }
+
+}
+function my_cool_plugin_settings_page() {
+global $wpdb;
+
+echo '<div class="wrap">';
+echo '<h1>Your Plugin Name</h1>';
+
+echo '<form method="post" action="">';
+echo '    <?php settings_fields( \'my-cool-plugin-settings-group\' ); ?>';
+echo '    <?php do_settings_sections( \'my-cool-plugin-settings-group\' ); ?>';
+echo '    <table class="form-table">';
+echo '        <tr valign="top">';
+echo '        <th scope="row">Class Name</th>';
+echo '        <td><input type="text" name="form_name" value="" /></td>';
+echo '        </tr>';
+
+echo '        <tr valign="top">';
+echo '        <th scope="row">Class ID</th>';
+echo '        <td><input type="text" name="form_id" value="" /></td>';
+echo '        </tr>';
+
+echo '        <tr valign="top">';
+echo '        <th scope="row">Class Day</th>';
+echo '        <td><input type="text" name="form_day" value="" /></td>';
+echo '        </tr>';
+echo '    </table>';
+
+echo '      <input type="submit" value="Submit">';
+
+echo '</form>';
+echo '</div>';
+
+if ($_POST['form_name'] == "")
+{
+	echo "";
+}
+else
+{
+
+	$wpdb->insert(
+		"wp_classes",
+		array(
+			'class' => $_POST['form_name'],
+			'id' => $_POST['form_id'],
+			'day' => $_POST['form_day'],
+
+		)
+	);
+	echo '<font color="green">Information Saved!</font>';
+	echo $_POST['form_name']. " ". $_POST['form_id'] . " ". $_POST['form_day'];
+}
+
+}
+
 function awesome_page_create() {
     $page_title = 'ClassroomManager';
     $menu_title = 'Classroom Manager';
@@ -162,9 +275,13 @@ function awesome_page_create() {
     $position = 61;
 
     add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
+		add_submenu_page('classroom-manager', 'Page1','Add Class', 'edit_posts', 'classroom-manager1','my_cool_plugin_settings_page');
+    add_submenu_page('classroom-manager', 'Page2', 'View Classes', 'edit_posts','classroom-manager2', 'display_classes') ;
 }
 
 add_shortcode( 'form', 'html_form_code');
 add_shortcode( 'foobar', 'data_func' );
+register_activation_hook( __FILE__, 'do_second' );
 register_activation_hook( __FILE__, 'do_first' );
+
 add_action('admin_menu', 'awesome_page_create');
