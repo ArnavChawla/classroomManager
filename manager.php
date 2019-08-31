@@ -141,8 +141,8 @@ function html_form_code() {
 
 function my_awesome_page_display() {
     global $wpdb;
-
-		if(!array_key_exists('form_class', $_POST))
+		//wp_enqueue_style('table_css', plugins_url('/test.css',__FILE__ ));
+		if(!array_key_exists('form_class', $_POST) && !array_key_exists('form_date', $_POST))
 		{
 			$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
 			$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
@@ -187,6 +187,16 @@ function my_awesome_page_display() {
 		        echo "<tr>";
 		        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
 		        echo "</tr>";
+						echo "<td colspan='2'><hr size='1'></td>";
+						echo "<tr>";
+						echo "<th>Date</th>";
+						echo "<td>";
+						echo '<form action="" method="post">';
+					  echo '<input type="date" name="bday">';
+					  echo '<input type="submit">';
+						echo '</form>';
+						echo "</td>";
+						echo "</tr>";
 
 	        }
 	        echo "</tbody>";
@@ -198,7 +208,7 @@ function my_awesome_page_display() {
 	        echo 'empty';
 	    }
 	}
-	else {
+	elseif(array_key_exists('form_class', $_POST)){
 		$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
 		$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
 		$string = $_POST['form_class'];
@@ -262,6 +272,9 @@ function my_awesome_page_display() {
 		{
 				echo 'empty';
 		}
+	}
+	else {
+		echo "thing";
 	}
 }
 function display_classes() {
