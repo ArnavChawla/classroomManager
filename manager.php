@@ -15,13 +15,14 @@
 	$charset_collate = $wpdb->get_charset_collate();
 	$sql = "CREATE TABLE $table_name (
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
-		time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 		name text NOT NULL,
 		class text NOT NULL,
 		classId text NOT NULL,
 		email text NOT NULL,
 		phone text NOT NULL,
 		day text NOT NULL,
+		active text NOT NULL,
+		vacation DATE NULL,
 		PRIMARY KEY (id)
 	) $charset_collate;";
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -100,6 +101,7 @@ function data_func( $atts ){
 			'email' => $_POST['form_email'],
 			'phone' => $_POST['form_phone'],
 			'day' => $_POST['form_day'],
+			'active' => "yes",
 
 		)
 	);
@@ -107,6 +109,7 @@ function data_func( $atts ){
 
 }
 function html_form_code() {
+//	echo (date('Y-m-d'));
 	global $wpdb;
 	echo '<form action="" method="post">';
 	echo '<p>';
@@ -162,7 +165,13 @@ function my_awesome_page_display() {
 					echo "</thead>";
 					echo '<tbody>';
 	        foreach($results as $row){
-						echo '<tr>';
+						if($row->vacation == NULL || ($row->vacation < date('Y-m-d')))
+						{
+							echo '<tr bgcolor="#008000">';
+						}
+						else {
+							echo '<tr bgcolor="#808080">';
+						}
 						echo '<td>'.$row->id.'</td>';
 						echo '<td>'.$row->name.'</td>';
 						echo '<td>'.$row->email.'</td>';
@@ -184,7 +193,15 @@ function my_awesome_page_display() {
 						echo '<td>'.$row->day.'</td>';
 						echo '<td>';
 						echo '<form action="" method="post">';
-						echo '<input type="date" name="form_date">';
+						echo '<input type="hidden" name="id" value="'. $row->id .'">';
+						if($row->vacation == NULL)
+						{
+							echo '<input type="date" name="form_date">';
+						}
+						else {
+							echo '<input type="date" name="form_date" value="' .$row->vacation.'">';
+						}
+
 						echo '<input type="submit">';
 						echo '</form>';
 						echo '</td>';
@@ -228,7 +245,13 @@ function my_awesome_page_display() {
 				echo "</thead>";
 				echo '<tbody>';
 				foreach($results as $row){
-					echo '<tr>';
+					if($row->vacation == NULL || ($row->vacation < date('Y-m-d')))
+					{
+						echo '<tr bgcolor="#008000">';
+					}
+					else {
+						echo '<tr bgcolor="#808080">';
+					}
 					echo '<td>'.$row->id.'</td>';
 					echo '<td>'.$row->name.'</td>';
 					echo '<td>'.$row->email.'</td>';
@@ -250,7 +273,14 @@ function my_awesome_page_display() {
 					echo '<td>'.$row->day.'</td>';
 					echo '<td>';
 					echo '<form action="" method="post">';
-					echo '<input type="date" name="form_date">';
+					echo '<input type="hidden" name="id" value="'. $row->id .'">';
+					if($row->vacation == NULL)
+					{
+						echo '<input type="date" name="form_date">';
+					}
+					else {
+						echo '<input type="date" name="form_date" value="' .$row->vacation.'">';
+					}
 					echo '<input type="submit">';
 					echo '</form>';
 					echo '</td>';
@@ -266,7 +296,80 @@ function my_awesome_page_display() {
 		}
 	}
 	else {
-		echo "thing";
+		$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
+		$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
+		$string = $_POST['form_date'];
+
+
+		$table = 'wp_student';
+		$data = array('vacation'=>$string);
+		$where = array('id'=>$_POST['id']);
+		$wpdb->update( $table, $data, $where);
+		if(!empty($results))                        // Checking if $results have some values or not
+		{
+				echo "<table width='100%' border='0'>";
+				echo "<thead>";
+				echo' <tr>';
+				echo' <th><h1>ID</h1></th>';
+				echo' <th><h1>Name</h1></th>';
+				echo' <th><h1>Email</h1></th>';
+				echo' <th><h1>Class</h1></th>';
+				echo' <th><h1>Phone</h1></th>';
+				echo' <th><h1>Day</h1></th>';
+				echo' <th><h1>Vacation</h1></th>';
+				echo'</tr>';
+				echo "</thead>";
+				echo '<tbody>';
+				foreach($results as $row){
+					if($row->vacation == NULL || ($row->vacation < date('Y-m-d')))
+					{
+						echo '<tr bgcolor="#008000">';
+					}
+					else {
+						echo '<tr bgcolor="#808080">';
+					}
+					echo '<td>'.$row->id.'</td>';
+					echo '<td>'.$row->name.'</td>';
+					echo '<td>'.$row->email.'</td>';
+					echo '<td>';
+					echo '<form action="" method="post">';
+					echo '<input type="hidden" name="id" value="'. $row->id .'">';
+					echo '<select name="form_class" onchange="this.form.submit()" >';
+					echo "<option value=\"". $row->classId . "\">" .$row->class. "</option>";
+					foreach($classResults as $newRow)
+					{
+						if($newRow->id != $row->classId){
+						echo "<option value=\"". $newRow->id . ",". $newRow->class ."\">" .$newRow->class. "</option>";
+						}
+					}
+					echo '</select>';
+					echo "</form>";
+					echo'</td>';
+					echo '<td>'.$row->phone.'</td>';
+					echo '<td>'.$row->day.'</td>';
+					echo '<td>';
+					echo '<form action="" method="post">';
+					echo '<input type="hidden" name="id" value="'. $row->id .'">';
+					if($row->vacation == NULL)
+					{
+						echo '<input type="date" name="form_date">';
+					}
+					else {
+						echo '<input type="date" name="form_date" value="' .$row->vacation.'">';
+					}
+					echo '<input type="submit">';
+					echo '</form>';
+					echo '</td>';
+					echo '</tr>';
+				}
+				echo "</tbody>";
+				echo "</table>";
+
+		}
+		else
+		{
+				echo 'empty';
+		}
 	}
 }
 function display_classes() {
