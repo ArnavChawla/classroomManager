@@ -141,30 +141,31 @@ function html_form_code() {
 
 function my_awesome_page_display() {
     global $wpdb;
-		//wp_enqueue_style('table_css', plugins_url('/test.css',__FILE__ ));
+		wp_enqueue_style('table_css', plugins_url('/test.css',__FILE__ ));
 		if(!array_key_exists('form_class', $_POST) && !array_key_exists('form_date', $_POST))
 		{
 			$results = $wpdb->get_results( "SELECT * FROM wp_student"); // Query to fetch data from database table and storing in $results
 			$classResults = $wpdb->get_results( "SELECT * FROM wp_classes");
 	    if(!empty($results))                        // Checking if $results have some values or not
 	    {
-	        echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
-	        echo "<tbody>";
-	        foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
-		        echo "<tr>";                           // Adding rows of table inside foreach loop
-		        echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
-		        echo "</tr>";
-		        echo "<td colspan='2'><hr size='1'></td>";
-		        echo "<tr>";
-		        echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
-		        echo "</tr>";
-		        echo "<td colspan='2'><hr size='1'></td>";
-		        echo "<tr>";
-		        echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
-		        echo "</tr>";
-		        echo "<td colspan='2'><hr size='1'></td>";
-		        echo "<tr>";
-		        echo "<th>Class</th>" . "<td>";
+	        echo "<table width='100%' border='0'>";
+					echo "<thead>";
+					echo' <tr>';
+					echo' <th><h1>ID</h1></th>';
+					echo' <th><h1>Name</h1></th>';
+					echo' <th><h1>Email</h1></th>';
+					echo' <th><h1>Class</h1></th>';
+					echo' <th><h1>Phone</h1></th>';
+					echo' <th><h1>Day</h1></th>';
+					echo'</tr>';
+					echo "</thead>";
+					echo '<tbody>';
+	        foreach($results as $row){
+						echo '<tr>';
+						echo '<td>'.$row->id.'</td>';
+						echo '<td>'.$row->name.'</td>';
+						echo '<td>'.$row->email.'</td>';
+						echo '<td>';
 						echo '<form action="" method="post">';
 						echo '<input type="hidden" name="id" value="'. $row->id .'">';
 						echo '<select name="form_class" onchange="this.form.submit()" >';
@@ -177,27 +178,10 @@ function my_awesome_page_display() {
 						}
 						echo '</select>';
 						echo "</form>";
-						echo "</td>";
-		        echo "</tr>";
-		        echo "<td colspan='2'><hr size='1'></td>";
-		        echo "<tr>";
-		        echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
-		        echo "</tr>";
-		        echo "<td colspan='2'><hr size='1'></td>";
-		        echo "<tr>";
-		        echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
-		        echo "</tr>";
-						echo "<td colspan='2'><hr size='1'></td>";
-						echo "<tr>";
-						echo "<th>Date</th>";
-						echo "<td>";
-						echo '<form action="" method="post">';
-					  echo '<input type="date" name="bday">';
-					  echo '<input type="submit">';
-						echo '</form>';
-						echo "</td>";
-						echo "</tr>";
-
+						echo'</td>';
+						echo '<td>'.$row->phone.'</td>';
+						echo '<td>'.$row->day.'</td>';
+						echo '</tr>';
 	        }
 	        echo "</tbody>";
 	        echo "</table>";
@@ -223,23 +207,24 @@ function my_awesome_page_display() {
 		$wpdb->update( $table, $data, $where);
 		if(!empty($results))                        // Checking if $results have some values or not
 		{
-				echo "<table width='100%' border='0'>"; // Adding <table> and <tbody> tag outside foreach loop so that it wont create again and again
-				echo "<tbody>";
-				foreach($results as $row){            //putting the user_ip field value in variable to use it later in update query
-					echo "<tr>";                           // Adding rows of table inside foreach loop
-					echo "<th>ID</th>" . "<td>" . $row->id . "</td>";
-					echo "</tr>";
-					echo "<td colspan='2'><hr size='1'></td>";
-					echo "<tr>";
-					echo "<th>Name</th>" . "<td>" . $row->name . "</td>";   //fetching data from user_ip field
-					echo "</tr>";
-					echo "<td colspan='2'><hr size='1'></td>";
-					echo "<tr>";
-					echo "<th>Email</th>" . "<td>" . $row->email . "</td>";
-					echo "</tr>";
-					echo "<td colspan='2'><hr size='1'></td>";
-					echo "<tr>";
-					echo "<th>Class</th>" . "<td>";
+				echo "<table width='100%' border='0'>";
+				echo "<thead>";
+				echo' <tr>';
+				echo' <th><h1>ID</h1></th>';
+				echo' <th><h1>Name</h1></th>';
+				echo' <th><h1>Email</h1></th>';
+				echo' <th><h1>Class</h1></th>';
+				echo' <th><h1>Phone</h1></th>';
+				echo' <th><h1>Day</h1></th>';
+				echo'</tr>';
+				echo "</thead>";
+				echo '<tbody>';
+				foreach($results as $row){
+					echo '<tr>';
+					echo '<td>'.$row->id.'</td>';
+					echo '<td>'.$row->name.'</td>';
+					echo '<td>'.$row->email.'</td>';
+					echo '<td>';
 					echo '<form action="" method="post">';
 					echo '<input type="hidden" name="id" value="'. $row->id .'">';
 					echo '<select name="form_class" onchange="this.form.submit()" >';
@@ -252,17 +237,10 @@ function my_awesome_page_display() {
 					}
 					echo '</select>';
 					echo "</form>";
-					echo "</td>";
-					echo "</tr>";
-					echo "<td colspan='2'><hr size='1'></td>";
-					echo "<tr>";
-					echo "<th>Phone</th>" . "<td>" . $row->phone . "</td>";
-					echo "</tr>";
-					echo "<td colspan='2'><hr size='1'></td>";
-					echo "<tr>";
-					echo "<th>Day</th>" . "<td>" . $row->day . "</td>";
-					echo "</tr>";
-
+					echo'</td>';
+					echo '<td>'.$row->phone.'</td>';
+					echo '<td>'.$row->day.'</td>';
+					echo '</tr>';
 				}
 				echo "</tbody>";
 				echo "</table>";
