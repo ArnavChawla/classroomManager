@@ -157,6 +157,7 @@ function my_awesome_page_display() {
 					echo' <th><h1>Class</h1></th>';
 					echo' <th><h1>Phone</h1></th>';
 					echo' <th><h1>Day</h1></th>';
+					echo' <th><h1>Vacation</h1></th>';
 					echo'</tr>';
 					echo "</thead>";
 					echo '<tbody>';
@@ -181,6 +182,12 @@ function my_awesome_page_display() {
 						echo'</td>';
 						echo '<td>'.$row->phone.'</td>';
 						echo '<td>'.$row->day.'</td>';
+						echo '<td>';
+						echo '<form action="" method="post">';
+						echo '<input type="date" name="form_date">';
+						echo '<input type="submit">';
+						echo '</form>';
+						echo '</td>';
 						echo '</tr>';
 	        }
 	        echo "</tbody>";
@@ -216,6 +223,7 @@ function my_awesome_page_display() {
 				echo' <th><h1>Class</h1></th>';
 				echo' <th><h1>Phone</h1></th>';
 				echo' <th><h1>Day</h1></th>';
+				echo' <th><h1>Vacation</h1></th>';
 				echo'</tr>';
 				echo "</thead>";
 				echo '<tbody>';
@@ -240,6 +248,12 @@ function my_awesome_page_display() {
 					echo'</td>';
 					echo '<td>'.$row->phone.'</td>';
 					echo '<td>'.$row->day.'</td>';
+					echo '<td>';
+					echo '<form action="" method="post">';
+					echo '<input type="date" name="form_date">';
+					echo '<input type="submit">';
+					echo '</form>';
+					echo '</td>';
 					echo '</tr>';
 				}
 				echo "</tbody>";
